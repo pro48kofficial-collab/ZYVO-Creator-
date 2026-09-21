@@ -1,0 +1,1 @@
+const express=require('express'),cors=require('cors');const app=express();app.use(cors());app.use(express.json({limit:'2mb'}));app.use(express.static(__dirname));app.get('/api/health',(q,r)=>r.json({ok:true,version:'3.0'}));app.listen(process.env.PORT||10000,()=>console.log('ZYVO Creator online'));
