@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ZYVO Creator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <header class="topbar">
+    <div>
+      <div class="logo">ZYVO</div>
+      <div class="creator-text">CREATOR</div>
+    </div>
+
+    <div class="status" id="status">
+      ● Онлайн
+    </div>
+  </header>
+
+  <main>
+
+    <section class="welcome">
+      <span class="badge">ZYVO CREATOR</span>
+      <h1>Створюй власні ігри.</h1>
+      <p>
+        Створи гру, налаштуй її та опублікуй на ZYVO.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>🎮 Мої ігри</h2>
+
+      <div id="games" class="games">
+        Завантаження...
+      </div>
+
+      <button class="primary" onclick="showCreate()">
+        ＋ Створити гру
+      </button>
+    </section>
+
+    <section class="card hidden" id="createPanel">
+      <h2>➕ Нова гра</h2>
+
+      <label>Назва гри</label>
+      <input
+        id="gameTitle"
+        maxlength="60"
+        placeholder="Наприклад: ZYVO Racing"
+      >
+
+      <label>Ім'я творця</label>
+      <input
+        id="gameAuthor"
+        maxlength="24"
+        placeholder="Твій нікнейм"
+      >
+
+      <label>Опис</label>
+      <textarea
+        id="gameDescription"
+        maxlength="300"
+        placeholder="Розкажи про свою гру..."
+      ></textarea>
+
+      <div class="buttons">
+        <button class="primary" onclick="createGame()">
+          🚀 Створити
+        </button>
+
+        <button onclick="hideCreate()">
+          Скасувати
+        </button>
+      </div>
+
+      <div id="createResult"></div>
+    </section>
+
+    <section class="card hidden" id="editorPanel">
+      <div class="editor-head">
+        <div>
+          <h2>🧱 Редактор</h2>
+          <p id="editorGameName"></p>
+        </div>
+
+        <button onclick="closeEditor()">
+          Закрити
+        </button>
+      </div>
+
+      <div class="editor-grid">
+
+        <div class="toolbox">
+          <h3>Інструменти</h3>
+
+          <button onclick="selectTool('block')">
+            🧱 Блок
+          </button>
+
+          <button onclick="selectTool('spawn')">
+            🟢 Spawn
+          </button>
+
+          <button onclick="selectTool('coin')">
+            🪙 Coin
+          </button>
+
+          <button onclick="selectTool('delete')">
+            🗑 Видалити
+          </button>
+        </div>
+
+        <div>
+          <div class="game-canvas" id="gameCanvas">
+            <div class="canvas-hint">
+              Вибери інструмент і натискай на поле
+            </div>
+          </div>
+
+          <div class="editor-actions">
+            <button onclick="clearCanvas()">
+              Очистити
+            </button>
+
+            <button class="primary" onclick="saveEditor()">
+              💾 Зберегти
+            </button>
+
+            <button class="publish" onclick="publishGame()">
+              🚀 Опублікувати
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <div id="editorMessage"></div>
+    </section>
+
+    <section class="card stats">
+      <h2>📊 Статистика</h2>
+
+      <div class="stat-grid">
+        <div>
+          <b id="gameCount">0</b>
+          <span>Ігор</span>
+        </div>
+
+        <div>
+          <b id="totalPlayers">0</b>
+          <span>Гравців</span>
+        </div>
+
+        <div>
+          <b id="earnedCoins">0</b>
+          <span>🪙 Коінів</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
