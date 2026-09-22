@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: zyvo-creator
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: zyvo-db
+          property: connectionString
