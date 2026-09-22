@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZYVO Creator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div id="loader">
+  <div class="logo">ZYVO</div>
+  <div class="creator">CREATOR</div>
+
+  <div class="loader-bar">
+    <div id="loaderProgress"></div>
+  </div>
+
+  <div id="loaderText">
+    Запуск Creator...
+  </div>
+</div>
+
+<div id="app" class="hidden">
+
+  <header class="topbar">
+
+    <div>
+      <div class="brand">ZYVO</div>
+      <div class="brand-sub">
+        CREATOR
+      </div>
+    </div>
+
+    <a
+      class="platform-button"
+      href="/"
+    >
+      ZYVO
+    </a>
+
+  </header>
+
+  <main>
+
+    <!-- DASHBOARD -->
+
+    <section class="dashboard">
+
+      <div class="hero">
+
+        <span class="eyebrow">
+          ZYVO CREATOR
+        </span>
+
+        <h1>
+          Створюй власні ігри.
+        </h1>
+
+        <p>
+          Створюй рівні, розставляй об'єкти
+          та публікуй свої ігри на ZYVO.
+        </p>
+
+        <button
+          class="primary-button"
+          onclick="showCreate()"
+        >
+          ＋ Створити гру
+        </button>
+
+      </div>
+
+      <div class="stats">
+
+        <div class="stat">
+          <strong id="gameCount">
+            0
+          </strong>
+          <span>Мої ігри</span>
+        </div>
+
+        <div class="stat">
+          <strong id="totalPlayers">
+            0
+          </strong>
+          <span>Гравців</span>
+        </div>
+
+        <div class="stat">
+          <strong id="earnedCoins">
+            0
+          </strong>
+          <span>Зароблено 🪙</span>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- CREATE -->
+
+    <section
+      id="createPanel"
+      class="panel hidden"
+    >
+
+      <div class="panel-head">
+
+        <div>
+          <span class="eyebrow">
+            NEW GAME
+          </span>
+
+          <h2>
+            Створення гри
+          </h2>
+        </div>
+
+        <button
+          class="close-button"
+          onclick="hideCreate()"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <input
+        id="gameTitle"
+        placeholder="Назва гри"
+        maxlength="100"
+      >
+
+      <input
+        id="gameAuthor"
+        placeholder="Ім'я творця"
+        maxlength="50"
+      >
+
+      <textarea
+        id="gameDescription"
+        placeholder="Опис гри"
+        maxlength="1000"
+      ></textarea>
+
+      <div
+        id="createResult"
+        class="result"
+      ></div>
+
+      <button
+        class="primary-button full"
+        onclick="createGame()"
+      >
+        Створити
+      </button>
+
+    </section>
+
+    <!-- GAMES -->
+
+    <section>
+
+      <div class="section-head">
+
+        <div>
+          <span class="eyebrow">
+            PROJECTS
+          </span>
+
+          <h2>
+            Мої ігри
+          </h2>
+        </div>
+
+        <button
+          class="refresh"
+          onclick="loadGames()"
+        >
+          ↻
+        </button>
+
+      </div>
+
+      <div id="games">
+        Завантаження...
+      </div>
+
+    </section>
+
+    <!-- EDITOR -->
+
+    <section
+      id="editorPanel"
+      class="panel hidden"
+    >
+
+      <div class="panel-head">
+
+        <div>
+
+          <span class="eyebrow">
+            GAME EDITOR
+          </span>
+
+          <h2 id="editorGameName">
+            Редактор
+          </h2>
+
+        </div>
+
+        <button
+          class="close-button"
+          onclick="closeEditor()"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <div class="tools">
+
+        <button
+          onclick="selectTool('block')"
+        >
+          🧱 Блок
+        </button>
+
+        <button
+          onclick="selectTool('spawn')"
+        >
+          🟢 Spawn
+        </button>
+
+        <button
+          onclick="selectTool('coin')"
+        >
+          🪙 Coin
+        </button>
+
+        <button
+          onclick="selectTool('delete')"
+        >
+          🗑 Видалити
+        </button>
+
+        <button
+          onclick="clearCanvas()"
+        >
+          🧹 Очистити
+        </button>
+
+      </div>
+
+      <div
+        id="gameCanvas"
+        class="game-canvas"
+      ></div>
+
+      <div class="editor-bottom">
+
+        <div
+          id="editorMessage"
+          class="result"
+        ></div>
+
+        <div class="editor-buttons">
+
+          <button
+            class="secondary-button"
+            onclick="saveEditor()"
+          >
+            💾 Зберегти
+          </button>
+
+          <button
+            class="primary-button"
+            onclick="publishGame()"
+          >
+            🚀 Опублікувати
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+  </html>
