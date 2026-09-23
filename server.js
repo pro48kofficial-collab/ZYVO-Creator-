@@ -1,433 +1,75 @@
 const express = require("express");
 const path = require("path");
-const { Pool } = require("pg");
+const fs = require("fs");
 
 const app = express();
+const PORT = process.env.PORT || 3000;
+const projectsDir = path.join(__dirname, "projects");
 
-const PORT =
-  process.env.PORT || 3000;
+fs.mkdirSync(projectsDir, { recursive: true });
+app.use(express.json({ limit: "50mb" }));
+app.use(express.static(__dirname));
 
-const db = new Pool({
-  connectionString:
-    process.env.DATABASE_URL,
+app.get("/api/health", (req, res) => {
+  res.json({ ok: true, service: "ZYVO Creator 3D" });
+});
 
-  ssl: {
-    rejectUnauthorized: false
+app.get("/api/projects", (req, res) => {
+  try {
+    res.json(fs.readdirSync(projectsDir)
+      .filter(f => f.endsWith(".zyvo"))
+      .map(f => ({
+        name: f.replace(/\.zyvo$/i, ""),
+        file: f,
+        updatedAt: fs.statSync(path.join(projectsDir, f)).mtime
+      })));
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Не вдалося прочитати проєкти." });
   }
 });
 
-app.use(
-  express.json({
-    limit: "2mb"
-  })
-);
-
-app.use(
-  express.static(__dirname)
-);
-
-/* DATABASE */
-
-async function initDB() {
-
-  await db.query(`
-    CREATE TABLE IF NOT EXISTS games (
-
-      id SERIAL PRIMARY KEY,
-
-      title VARCHAR(100)
-        NOT NULL,
-
-      author VARCHAR(50)
-        NOT NULL,
-
-      description TEXT
-        DEFAULT '',
-
-      objects JSONB
-        DEFAULT '[]',
-
-      players INTEGER
-        DEFAULT 0,
-
-      earned_coins INTEGER
-        DEFAULT 0,
-
-      published BOOLEAN
-        DEFAULT FALSE,
-
-      created_at TIMESTAMP
-        DEFAULT CURRENT_TIMESTAMP
-
-    )
-  `);
-}
-
-/* HEALTH */
-
-app.get(
-  "/api/health",
-  async (req, res) => {
-
-    try {
-
-      await db.query(
-        "SELECT 1"
-      );
-
-      res.json({
-        ok: true,
-        database:
-          "connected"
-      });
-
-    } catch (error) {
-
-      console.error(error);
-
-      res.status(500).json({
-        ok: false,
-        database:
-          "error"
-      });
+app.post("/api/projects", (req, res) => {
+  try {
+    const project = req.body;
+    if (!project || project.format !== "ZYVO") {
+      return res.status(400).json({ error: "Невірний .zyvo проєкт." });
     }
-  }
-);
 
-/* ALL GAMES */
-
-app.get(
-  "/api/games",
-  async (req, res) => {
-
-    try {
-
-      const result =
-        await db.query(`
-          SELECT
-            id,
-            title,
-            author,
-            description,
-            objects,
-            players,
-            earned_coins
-              AS "earnedCoins",
-            published
-
-          FROM games
-
-          ORDER BY id DESC
-        `);
-
-      res.json(
-        result.rows
-      );
-
-    } catch (error) {
-
-      console.error(error);
-
-      res.status(500).json({
-        error:
-          "Не вдалося завантажити ігри."
-      });
-    }
-  }
-);
-
-/* CREATE GAME */
-
-app.post(
-  "/api/games",
-  async (req, res) => {
-
-    try {
-
-      const title =
-        String(
-          req.body.title || ""
-        )
-          .trim()
-          .slice(0, 100);
-
-      const author =
-        String(
-          req.body.author || ""
-        )
-          .trim()
-          .slice(0, 50);
-
-      const description =
-        String(
-          req.body.description || ""
-        )
-          .trim()
-          .slice(0, 1000);
-
-      if (!title) {
-
-        return res.status(400).json({
-          error:
-            "Введи назву гри."
-        });
-      }
-
-      if (!author) {
-
-        return res.status(400).json({
-          error:
-            "Введи ім'я творця."
-        });
-      }
-
-      const result =
-        await db.query(
-          `
-          INSERT INTO games
-            (
-              title,
-              author,
-              description
-            )
-
-          VALUES
-            ($1, $2, $3)
-
-          RETURNING
-            id,
-            title,
-            author,
-            description,
-            objects,
-            players,
-            earned_coins
-              AS "earnedCoins",
-            published
-          `,
-          [
-            title,
-            author,
-            description
-          ]
-        );
-
-      res.json(
-        result.rows[0]
-      );
-
-    } catch (error) {
-
-      console.error(error);
-
-      res.status(500).json({
-        error:
-          "Не вдалося створити гру."
-      });
-    }
-  }
-);
-
-/* SAVE GAME */
-
-app.put(
-  "/api/games/:id",
-  async (req, res) => {
-
-    try {
-
-      const objects =
-        req.body.objects;
-
-      if (!Array.isArray(objects)) {
-
-        return res.status(400).json({
-          error:
-            "Неправильні дані об'єктів."
-        });
-      }
-
-      const cleanObjects =
-        objects
-          .slice(0, 1000)
-          .map(
-            function(object) {
-
-              return {
-                x:
-                  Number(
-                    object.x
-                  ) || 0,
-
-                y:
-                  Number(
-                    object.y
-                  ) || 0,
-
-                type:
-                  String(
-                    object.type ||
-                    "block"
-                  )
-              };
-
-            }
-          );
-
-      const result =
-        await db.query(
-          `
-          UPDATE games
-
-          SET objects = $1
-
-          WHERE id = $2
-
-          RETURNING
-            id,
-            title,
-            author,
-            description,
-            objects,
-            players,
-            earned_coins
-              AS "earnedCoins",
-            published
-          `,
-          [
-            JSON.stringify(
-              cleanObjects
-            ),
-            req.params.id
-          ]
-        );
-
-      if (!result.rows.length) {
-
-        return res.status(404).json({
-          error:
-            "Гру не знайдено."
-        });
-      }
-
-      res.json(
-        result.rows[0]
-      );
-
-    } catch (error) {
-
-      console.error(error);
-
-      res.status(500).json({
-        error:
-          "Не вдалося зберегти гру."
-      });
-    }
-  }
-);
-
-/* PUBLISH */
-
-app.post(
-  "/api/games/:id/publish",
-  async (req, res) => {
-
-    try {
-
-      const result =
-        await db.query(
-          `
-          UPDATE games
-
-          SET published = TRUE
-
-          WHERE id = $1
-
-          RETURNING
-            id,
-            title,
-            author,
-            description,
-            objects,
-            players,
-            earned_coins
-              AS "earnedCoins",
-            published
-          `,
-          [
-            req.params.id
-          ]
-        );
-
-      if (!result.rows.length) {
-
-        return res.status(404).json({
-          error:
-            "Гру не знайдено."
-        });
-      }
-
-      res.json({
-        ok: true,
-        game:
-          result.rows[0]
-      });
-
-    } catch (error) {
-
-      console.error(error);
-
-      res.status(500).json({
-        error:
-          "Не вдалося опублікувати гру."
-      });
-    }
-  }
-);
-
-/* FRONTEND */
-
-app.get(
-  /.*/,
-  (req, res) => {
-
-    res.sendFile(
-      path.join(
-        __dirname,
-        "index.html"
-      )
+    const safeName = String(project.name || "Untitled")
+      .replace(/[^a-zA-Z0-9а-яА-ЯіІїЇєЄ _-]/g, "_")
+      .trim().slice(0, 80) || "Untitled";
+
+    const file = safeName + ".zyvo";
+    fs.writeFileSync(
+      path.join(projectsDir, file),
+      JSON.stringify(project, null, 2),
+      "utf8"
     );
+
+    res.json({ ok: true, file, name: safeName });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Не вдалося зберегти .zyvo." });
   }
-);
+});
 
-/* START */
+app.get("/api/projects/:file", (req, res) => {
+  const file = path.basename(req.params.file);
+  if (!file.endsWith(".zyvo")) {
+    return res.status(400).json({ error: "Потрібен .zyvo файл." });
+  }
+  const full = path.join(projectsDir, file);
+  if (!fs.existsSync(full)) {
+    return res.status(404).json({ error: "Проєкт не знайдено." });
+  }
+  res.type("application/json").send(fs.readFileSync(full, "utf8"));
+});
 
-initDB()
-  .then(
-    function() {
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
 
-      app.listen(
-        PORT,
-        "0.0.0.0",
-        function() {
-
-          console.log(
-            `ZYVO Creator running on ${PORT}`
-          );
-
-        }
-      );
-
-    }
-  )
-  .catch(
-    function(error) {
-
-      console.error(
-        "Database initialization failed:",
-        error
-      );
-
-      process.exit(1);
-    }
-  );
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("ZYVO Creator 3D running on " + PORT);
+});

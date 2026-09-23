@@ -1,298 +1,89 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZYVO Creator</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ZYVO Creator 3D</title>
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
-<div id="loader">
-  <div class="logo">ZYVO</div>
-  <div class="creator">CREATOR</div>
-
-  <div class="loader-bar">
-    <div id="loaderProgress"></div>
-  </div>
-
-  <div id="loaderText">
-    Запуск Creator...
-  </div>
+<div id="loading">
+  <div class="loading-logo">ZYVO</div>
+  <div class="loading-bar"><span id="loadingFill"></span></div>
+  <div class="loading-text">Завантаження Creator...</div>
 </div>
 
-<div id="app" class="hidden">
+<header class="topbar">
+  <div class="brand">ZYVO <span>Creator 3D</span></div>
+  <input id="projectName" value="MyWorld" maxlength="80">
+  <div class="top-actions">
+    <button id="newBtn">Новий</button>
+    <button id="openBtn">Імпорт</button>
+    <button id="saveBtn">Експорт .zyvo</button>
+    <button id="publishBtn" class="accent">Зберегти</button>
+    <input id="fileInput" type="file" accept=".zyvo,.glb" hidden>
+  </div>
+</header>
 
-  <header class="topbar">
+<main class="workspace">
+<aside class="left-panel">
+  <section>
+    <h3>Об'єкти</h3>
+    <button class="wide" data-add="box">＋ Куб</button>
+    <button class="wide" data-add="sphere">＋ Сфера</button>
+    <button class="wide" data-add="cylinder">＋ Циліндр</button>
+    <button class="wide" data-add="plane">＋ Площина</button>
+  </section>
+  <section>
+    <h3>Інструмент</h3>
+    <button class="wide" data-tool="translate">Перемістити</button>
+    <button class="wide" data-tool="rotate">Обертати</button>
+    <button class="wide" data-tool="scale">Масштаб</button>
+  </section>
+  <section>
+    <h3>Сцена</h3>
+    <label class="check"><input id="gridToggle" type="checkbox" checked> Сітка</label>
+    <label class="check"><input id="snapToggle" type="checkbox"> Прив'язка</label>
+  </section>
+</aside>
 
-    <div>
-      <div class="brand">ZYVO</div>
-      <div class="brand-sub">
-        CREATOR
-      </div>
+<section class="viewport-wrap">
+  <div id="viewport"></div>
+  <div class="viewport-hud">
+    <span>ЛКМ: вибір</span><span>ПКМ: огляд</span><span>Колесо: масштаб</span>
+  </div>
+</section>
+
+<aside class="right-panel">
+  <section>
+    <h3>Ієрархія</h3>
+    <div id="objectList" class="object-list"></div>
+  </section>
+
+  <section>
+    <h3>Властивості</h3>
+    <div id="noSelection">Вибери об'єкт</div>
+    <div id="propertyForm" class="hidden">
+      <label>Назва<input id="objName"></label>
+      <label>Колір<input id="objColor" type="color" value="#7cff00"></label>
+      <label>Прозорість<input id="objOpacity" type="range" min="0.1" max="1" step="0.05" value="1"></label>
+      <b>Позиція</b>
+      <div class="triple"><input id="px" type="number" step=".1"><input id="py" type="number" step=".1"><input id="pz" type="number" step=".1"></div>
+      <b>Поворот</b>
+      <div class="triple"><input id="rx" type="number" step="1"><input id="ry" type="number" step="1"><input id="rz" type="number" step="1"></div>
+      <b>Масштаб</b>
+      <div class="triple"><input id="sx" type="number" step=".1"><input id="sy" type="number" step=".1"><input id="sz" type="number" step=".1"></div>
+      <button id="textureBtn" class="wide">Завантажити текстуру</button>
+      <input id="textureInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+      <button id="duplicateBtn" class="wide">Дублювати</button>
+      <button id="deleteBtn" class="wide danger">Видалити</button>
     </div>
-
-    <a
-      class="platform-button"
-      href="/"
-    >
-      ZYVO
-    </a>
-
-  </header>
-
-  <main>
-
-    <!-- DASHBOARD -->
-
-    <section class="dashboard">
-
-      <div class="hero">
-
-        <span class="eyebrow">
-          ZYVO CREATOR
-        </span>
-
-        <h1>
-          Створюй власні ігри.
-        </h1>
-
-        <p>
-          Створюй рівні, розставляй об'єкти
-          та публікуй свої ігри на ZYVO.
-        </p>
-
-        <button
-          class="primary-button"
-          onclick="showCreate()"
-        >
-          ＋ Створити гру
-        </button>
-
-      </div>
-
-      <div class="stats">
-
-        <div class="stat">
-          <strong id="gameCount">
-            0
-          </strong>
-          <span>Мої ігри</span>
-        </div>
-
-        <div class="stat">
-          <strong id="totalPlayers">
-            0
-          </strong>
-          <span>Гравців</span>
-        </div>
-
-        <div class="stat">
-          <strong id="earnedCoins">
-            0
-          </strong>
-          <span>Зароблено 🪙</span>
-        </div>
-
-      </div>
-
-    </section>
-
-    <!-- CREATE -->
-
-    <section
-      id="createPanel"
-      class="panel hidden"
-    >
-
-      <div class="panel-head">
-
-        <div>
-          <span class="eyebrow">
-            NEW GAME
-          </span>
-
-          <h2>
-            Створення гри
-          </h2>
-        </div>
-
-        <button
-          class="close-button"
-          onclick="hideCreate()"
-        >
-          ×
-        </button>
-
-      </div>
-
-      <input
-        id="gameTitle"
-        placeholder="Назва гри"
-        maxlength="100"
-      >
-
-      <input
-        id="gameAuthor"
-        placeholder="Ім'я творця"
-        maxlength="50"
-      >
-
-      <textarea
-        id="gameDescription"
-        placeholder="Опис гри"
-        maxlength="1000"
-      ></textarea>
-
-      <div
-        id="createResult"
-        class="result"
-      ></div>
-
-      <button
-        class="primary-button full"
-        onclick="createGame()"
-      >
-        Створити
-      </button>
-
-    </section>
-
-    <!-- GAMES -->
-
-    <section>
-
-      <div class="section-head">
-
-        <div>
-          <span class="eyebrow">
-            PROJECTS
-          </span>
-
-          <h2>
-            Мої ігри
-          </h2>
-        </div>
-
-        <button
-          class="refresh"
-          onclick="loadGames()"
-        >
-          ↻
-        </button>
-
-      </div>
-
-      <div id="games">
-        Завантаження...
-      </div>
-
-    </section>
-
-    <!-- EDITOR -->
-
-    <section
-      id="editorPanel"
-      class="panel hidden"
-    >
-
-      <div class="panel-head">
-
-        <div>
-
-          <span class="eyebrow">
-            GAME EDITOR
-          </span>
-
-          <h2 id="editorGameName">
-            Редактор
-          </h2>
-
-        </div>
-
-        <button
-          class="close-button"
-          onclick="closeEditor()"
-        >
-          ×
-        </button>
-
-      </div>
-
-      <div class="tools">
-
-        <button
-          onclick="selectTool('block')"
-        >
-          🧱 Блок
-        </button>
-
-        <button
-          onclick="selectTool('spawn')"
-        >
-          🟢 Spawn
-        </button>
-
-        <button
-          onclick="selectTool('coin')"
-        >
-          🪙 Coin
-        </button>
-
-        <button
-          onclick="selectTool('delete')"
-        >
-          🗑 Видалити
-        </button>
-
-        <button
-          onclick="clearCanvas()"
-        >
-          🧹 Очистити
-        </button>
-
-      </div>
-
-      <div
-        id="gameCanvas"
-        class="game-canvas"
-      ></div>
-
-      <div class="editor-bottom">
-
-        <div
-          id="editorMessage"
-          class="result"
-        ></div>
-
-        <div class="editor-buttons">
-
-          <button
-            class="secondary-button"
-            onclick="saveEditor()"
-          >
-            💾 Зберегти
-          </button>
-
-          <button
-            class="primary-button"
-            onclick="publishGame()"
-          >
-            🚀 Опублікувати
-          </button>
-
-        </div>
-
-      </div>
-
-    </section>
-
-  </main>
-
-</div>
-
-<script src="app.js"></script>
-
+  </section>
+  <section><p class="muted">.zyvo — власний формат ZYVO. У ньому зберігається сцена, об'єкти, матеріали й текстури.</p></section>
+</aside>
+</main>
+
+<footer class="statusbar"><span id="status">Готово</span><span id="objectCount">0 об'єктів</span></footer>
+<script type="module" src="app.js"></script>
 </body>
-  </html>
+</html>
