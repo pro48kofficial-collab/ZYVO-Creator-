@@ -203,8 +203,8 @@ io.on("connection", socket => {
   });
 });
 
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 server.listen(PORT, "0.0.0.0", () => {
